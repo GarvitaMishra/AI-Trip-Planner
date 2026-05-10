@@ -17,10 +17,10 @@
 //         password,
 //       });
 
-//       alert("Signup successful!");
+//       toast.success("Signup successful!");
 //       console.log(res.data);
 //     } catch (err) {
-//       alert("Error signing up");
+//       toast.error("Error signing up");
 //       console.log(err);
 //     }
 //   };
@@ -145,7 +145,7 @@ const Signup = () => {
       // ✅ Navigate to home
       navigate("/login");
     } catch (err) {
-      alert("Error signing up");
+      toast.error("Error signing up");
       console.log(err);
     }
   };

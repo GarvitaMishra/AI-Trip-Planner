@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import { toast } from "react-toastify";
 
 function CreateTrip() {
   const [destination, setDestination] = useState("");
@@ -27,7 +28,7 @@ function CreateTrip() {
       setData(res.data);
     } catch (error) {
       console.log(error);
-      alert("Error generating trip");
+      toast.error("Error generating trip");
     } finally {
       setLoading(false);
     }
@@ -35,7 +36,7 @@ function CreateTrip() {
 
   const handleSaveTrip = async () => {
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/trips",
         {
           destination,
@@ -52,10 +53,10 @@ function CreateTrip() {
         }
       );
 
-      alert("Trip saved successfully");
+      toast.success("Trip saved successfully");
     } catch (error) {
       console.log(error);
-      alert("Error saving trip");
+      toast.error("Error saving trip");
     }
   };
 
@@ -302,7 +303,7 @@ export default CreateTrip;
 //       setData(res.data);
 //     } catch (error) {
 //       console.log(error);
-//       alert("Error generating trip");
+//       toast.error("Error generating trip");
 //     } finally {
 //       setLoading(false);
 //     }
@@ -310,7 +311,7 @@ export default CreateTrip;
 
 //   const handleSaveTrip = async () => {
 //     if (!data) {
-//       alert("Generate trip first!");
+//       toast.error("Generate trip first!");
 //       return;
 //     }
 
@@ -332,10 +333,10 @@ export default CreateTrip;
 //         }
 //       );
 
-//       alert("Trip saved successfully");
+//       toast.success("Trip saved successfully");
 //     } catch (error) {
 //       console.log(error);
-//       alert("Error saving trip");
+//       toast.error("Error saving trip");
 //     }
 //   };
 
