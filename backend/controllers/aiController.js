@@ -1,272 +1,107 @@
-// const axios = require("axios");
-
-// // @desc Generate real AI trip plan
-// // @route POST /api/ai/generate
-// // @access Private
-// exports.generateTripPlan = async (req, res) => {
-//   try {
-//     const { destination, days } = req.body;
-
-//     if (!destination || !days) {
-//       return res.status(400).json({ message: "Please provide destination and days" });
-//     }
-
-//     // Strong prompt for structured output
-//     const prompt = `
-//     Create a ${days}-day travel plan for ${destination}.
-
-//     Return ONLY JSON in this exact format:
-//     {
-//       "itinerary": [{ "day": 1, "plan": "" }],
-//       "hotels": [],
-//       "food": [],
-//       "transport": [],
-//       "tips": [],
-//       "estimatedBudget": ""
-//     }
-
-//     Make it realistic and useful.
-//     No explanation outside JSON.
-//     `;
-
-//     const response = await axios.post(
-//       "https://openrouter.ai/api/v1/chat/completions",
-//       {
-//         model: "meta-llama/llama-3-8b-instruct",
-//         messages: [
-//           { role: "user", content: prompt }
-//         ]
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-//           "Content-Type": "application/json"
-//         }
-//       }
-//     );
-
-//     let aiText = response.data.choices[0].message.content;
-
-//     // Remove markdown if present
-//     aiText = aiText.replace(/```json|```/g, "").trim();
-
-//     let parsed;
-//     try {
-//       // Extract only JSON part safely
-//       const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-
-//       if (!jsonMatch) {
-//         return res.json({ raw: aiText });
-//       }
-
-//       parsed = JSON.parse(jsonMatch[0]);
-//     } catch (err) {
-//       return res.json({ raw: aiText }); // fallback
-//     }
-
-//         // Clean only plan text (NOT whole JSON)
-//         parsed.itinerary = parsed.itinerary.map(day => ({
-//           ...day,
-//           plan: day.plan.replace(/\n+/g, " ").trim()
-//         }));
-
-//     res.json(parsed);
-
-//   } catch (error) {
-//     console.log(error.response?.data || error.message);
-//     res.status(500).json({ message: "AI failed" });
-//   }
-// };
-
-// const axios = require("axios");
-
-// // @desc Generate real AI trip plan
-// // @route POST /api/ai/generate
-// // @access Private
-// exports.generateTripPlan = async (req, res) => {
-//   try {
-//     const { destination, days } = req.body;
-
-//     if (!destination || !days) {
-//       return res.status(400).json({ message: "Please provide destination and days" });
-//     }
-
-//     // 🔥 Strong prompt (VERY IMPORTANT)
-//     const prompt = `
-// Create a ${days}-day travel plan for ${destination}.
-
-// Return ONLY JSON in this exact format:
-// {
-//   "itinerary": [{ "day": 1, "plan": "string only" }],
-//   "hotels": [],
-//   "food": [],
-//   "transport": [],
-//   "tips": [],
-//   "estimatedBudget": ""
-// }
-
-// IMPORTANT:
-// - "plan" must ALWAYS be a STRING
-// - Do NOT return objects inside "plan"
-// - No explanation outside JSON
-
-// Make it realistic and useful.
-// `;
-
-//     const response = await axios.post(
-//       "https://openrouter.ai/api/v1/chat/completions",
-//       {
-//         model: "meta-llama/llama-3-8b-instruct",
-//         messages: [
-//           { role: "user", content: prompt }
-//         ]
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-//           "Content-Type": "application/json"
-//         }
-//       }
-//     );
-
-//     let aiText = response.data.choices[0].message.content;
-
-//     // ✅ Remove markdown (```json)
-//     aiText = aiText.replace(/```json|```/g, "").trim();
-
-//     let parsed;
-
-//     try {
-//       // ✅ Extract JSON safely
-//       const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-
-//       if (!jsonMatch) {
-//         return res.json({ raw: aiText });
-//       }
-
-//       parsed = JSON.parse(jsonMatch[0]);
-
-//     } catch (err) {
-//       return res.json({ raw: aiText }); // fallback
-//     }
-
-//     // ✅ CLEAN PLAN (handles string + object safely)
-//     if (parsed.itinerary && Array.isArray(parsed.itinerary)) {
-//       parsed.itinerary = parsed.itinerary.map(day => {
-//         let cleanPlan = "";
-
-//         if (typeof day.plan === "string") {
-//           cleanPlan = day.plan.replace(/\n+/g, " ").trim();
-//         } else if (typeof day.plan === "object") {
-//           cleanPlan = Object.values(day.plan).join(" ").replace(/\n+/g, " ").trim();
-//         }
-
-//         return {
-//           ...day,
-//           plan: cleanPlan
-//         };
-//       });
-//     }
-
-//     // ✅ Final clean response
-//     res.json(parsed);
-
-//   } catch (error) {
-//     console.log(error.response?.data || error.message);
-//     res.status(500).json({ message: "AI failed" });
-//   }
-// };
-
-
-
 const axios = require("axios");
 
-// @desc Generate real AI trip plan
+// @desc Generate AI Trip Plan
 // @route POST /api/ai/generate
 // @access Private
+
 exports.generateTripPlan = async (req, res) => {
   try {
     const { destination, days, budget, people, type } = req.body;
 
-    // Validate input
+    // VALIDATION
+
     if (!destination || !days || !budget || !people || !type) {
       return res.status(400).json({
-        message: "Please provide destination, days, budget, people, and type",
+        success: false,
+        message: "All fields are required",
       });
     }
 
-    // 🔥 STRONG PROMPT (FIXED)
-    const prompt = `
-Create a detailed ${days}-day travel plan.
+    // BULLETPROOF PROMPT
 
-Details:
+    const prompt = `
+You are an expert AI Travel Planner. Generate a highly detailed and realistic travel itinerary strictly based on the following inputs:
+
 - Destination: ${destination}
+- Duration: ${days} days
 - Budget: ₹${budget}
 - Travelers: ${people}
 - Trip Type: ${type}
 
 IMPORTANT RULES:
-- Stay STRICTLY within the given budget ₹${budget}
-- Budget must be realistic and NOT exceed
-- Suggest based on travelers:
-  * Solo → budget friendly
-  * Family → comfortable & safe
-  * Friends → fun & nightlife
-- If India → use INR
-- If International → convert properly
-- Always include costs for hotels, food, transport in the budget
-- ALWAYS generate valid clickable links
-- Use Google Maps search format:
-  https://www.google.com/maps/search/?api=1&query=PLACE_NAME
-Return ONLY JSON in this exact format:
+- Respond ONLY with a valid JSON object. 
+- Do not include any markdown formatting (do not use \`\`\`json). 
+- Do not include any conversational text, introductions, or explanations.
+- Make the data realistic and specific to the requested destination (${destination}).
+- Ensure all JSON keys match exactly as provided below.
 
+JSON FORMAT:
 {
+  "destination": "${destination}",
+  "days": ${days},
+  "budget": "${budget}",
+  "people": "${people}",
+  "type": "${type}",
   "itinerary": [
-    { "day": 1, "plan": "string" }
+    {
+      "day": 1,
+      "title": "Arrival and Exploration",
+      "plan": "Detailed activities customized for ${destination}"
+    }
   ],
   "hotels": [
     {
-      "name": "Hotel Name",
-      "address": "Location",
-      "price": "₹ per night",
-      "rating": "4.2",
-      "link": "https://www.google.com/maps/search/?api=1&query=Hotel+Name+City"
+      "name": "Realistic Hotel Name in ${destination}",
+      "address": "Realistic Address",
+      "price": "₹3000/night",
+      "rating": "4.5",
+      "link": "https://maps.google.com/?q=Hotel+Name"
     }
   ],
   "food": [
     {
-      "name": "Restaurant Name",
-      "address": "Location",
-      "cost": "₹ approx cost"
-      "link": "https://www.google.com/maps/search/?api=1&query=Restaurant+Name+City"
+      "name": "Realistic Restaurant Name in ${destination}",
+      "address": "Realistic Address",
+      "cost": "₹800 approx",
+      "famousFor": "Local specialty",
+      "link": "https://maps.google.com/?q=Restaurant+Name"
     }
   ],
   "transport": [
     {
-      "type": "Bus/Taxi/Bike",
-      "details": "info",
-      "cost": "₹ approx cost"
-      "link": "https://www.google.com/search?q=Taxi+in+City"
+      "type": "Taxi or Metro",
+      "details": "Details on commuting in ${destination}",
+      "cost": "₹1500"
     }
   ],
   "tips": [
-    "tip 1",
-    "tip 2"
+    "Specific travel tip for ${destination} 1",
+    "Specific travel tip for ${destination} 2"
   ],
-  "estimatedBudget": "Total cost breakdown within ₹${budget}"
+  "estimatedBudget": {
+    "hotel": "₹...",
+    "food": "₹...",
+    "transport": "₹...",
+    "activities": "₹...",
+    "total": "₹..."
+  }
 }
-
-IMPORTANT:
-- DO NOT return empty arrays
-- MUST include at least 2 hotels, 2 food places, 2 transport options
-- Keep everything practical and realistic
 `;
+
+    // API CALL
 
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "meta-llama/llama-3-8b-instruct",
-        messages: [{ role: "user", content: prompt }],
+        // Using a highly reliable, free Google Gemini model through OpenRouter
+        model: "openrouter/free",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.4, // Lower temperature forces adherence to JSON logic
       },
       {
         headers: {
@@ -276,49 +111,78 @@ IMPORTANT:
       }
     );
 
+    // RAW AI RESPONSE
+
     let aiText = response.data.choices[0].message.content;
 
-    // ✅ Remove markdown ```json
-    aiText = aiText.replace(/```json|```/g, "").trim();
+    console.log("RAW AI RESPONSE:", aiText);
 
-    let parsed;
+    // CLEAN RESPONSE (Strip accidental markdown backticks just in case)
 
-    try {
-      // ✅ Extract JSON safely
-      const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+    aiText = aiText
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
 
-      if (!jsonMatch) {
-        return res.json({ raw: aiText });
-      }
+    // FIND JSON
 
-      parsed = JSON.parse(jsonMatch[0]);
-    } catch (err) {
-      return res.json({ raw: aiText }); // fallback
-    }
+    const start = aiText.indexOf("{");
+    const end = aiText.lastIndexOf("}");
 
-    // ✅ CLEAN itinerary plan
-    if (parsed.itinerary && Array.isArray(parsed.itinerary)) {
-      parsed.itinerary = parsed.itinerary.map((day) => {
-        let cleanPlan = "";
-
-        if (typeof day.plan === "string") {
-          cleanPlan = day.plan.replace(/\n+/g, " ").trim();
-        } else if (typeof day.plan === "object") {
-          cleanPlan = Object.values(day.plan).join(" ").replace(/\n+/g, " ").trim();
-        }
-
-        return {
-          ...day,
-          plan: cleanPlan,
-        };
+    if (start === -1 || end === -1) {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid AI response format - No JSON object found.",
       });
     }
 
-    // ✅ Final clean response
-    res.json(parsed);
+    const jsonString = aiText.substring(start, end + 1);
+
+    let parsedData;
+
+    try {
+      parsedData = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.log("JSON PARSE ERROR:", parseError.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "AI returned broken JSON format",
+      });
+    }
+
+    // FALLBACK SAFETY
+
+    parsedData.destination = parsedData.destination || destination;
+    parsedData.itinerary = Array.isArray(parsedData.itinerary) ? parsedData.itinerary : [];
+    parsedData.hotels = Array.isArray(parsedData.hotels) ? parsedData.hotels : [];
+    parsedData.food = Array.isArray(parsedData.food) ? parsedData.food : [];
+    parsedData.transport = Array.isArray(parsedData.transport) ? parsedData.transport : [];
+    parsedData.tips = Array.isArray(parsedData.tips) ? parsedData.tips : [];
+
+    // CLEAN ITINERARY
+
+    parsedData.itinerary = parsedData.itinerary.map((item, index) => ({
+      day: item.day || index + 1,
+      title: item.title || `Day ${index + 1}`,
+      plan: typeof item.plan === "string" ? item.plan.replace(/\n/g, " ").trim() : "No plan available",
+    }));
+
+    // FINAL RESPONSE
+
+    return res.status(200).json({
+      success: true,
+      trip: parsedData,
+    });
   } catch (error) {
-    console.log(error.response?.data || error.message);
-    res.status(500).json({ message: "AI failed" });
+    console.log(
+      "AI GENERATION ERROR:",
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Trip generation failed. Ensure your OpenRouter API Key is valid.",
+    });
   }
 };
-

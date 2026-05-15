@@ -1,11 +1,30 @@
-// import { useContext, useState } from "react";
+// import { useContext, useEffect, useRef, useState } from "react";
 // import { ThemeContext } from "../context/ThemeContext";
 
 // function Navbar() {
-//   const { toggleTheme } = useContext(ThemeContext);
+//   const { darkMode, toggleTheme } = useContext(ThemeContext);
+
 //   const [showMenu, setShowMenu] = useState(false);
 
-//   const user = JSON.parse(localStorage.getItem("user") || "{}");
+//   const menuRef = useRef();
+
+//   const user = JSON.parse(localStorage.getItem("user") || "null");
+
+//   // CLOSE MENU ON OUTSIDE CLICK
+
+//   useEffect(() => {
+//     const handler = (e) => {
+//       if (menuRef.current && !menuRef.current.contains(e.target)) {
+//         setShowMenu(false);
+//       }
+//     };
+
+//     document.addEventListener("mousedown", handler);
+
+//     return () => {
+//       document.removeEventListener("mousedown", handler);
+//     };
+//   }, []);
 
 //   const handleLogout = () => {
 //     localStorage.clear();
@@ -13,214 +32,432 @@
 //   };
 
 //   return (
-//     <div style={styles.nav}>
-//       <h2>✈️ AI Trip Planner</h2>
+//     <nav
+//       style={{
+//         ...styles.nav,
+//         background: darkMode ? "#0f172a" : "linear-gradient(to right, #1e418e, #2b5b96)",
+//         borderBottom: darkMode
+//           ? "1px solid #1e293b"
+//           : "1px solid rgba(255,255,255,0.1)",
+//       }}
+//     >
+//       {/* LOGO */}
+
+//       <a href="/" style={styles.logo}>
+//        AI Trip Planner
+//       </a>
+
+//       {/* RIGHT */}
 
 //       <div style={styles.right}>
-//         <button onClick={toggleTheme}>🌙</button>
+//         {/* DARK MODE */}
 
-//         <div style={{ position: "relative" }}>
+//         <button onClick={toggleTheme} style={styles.themeBtn}>
+//           {darkMode ? "☀️" : "🌙"}
+//         </button>
+
+//         {/* MY TRIPS */}
+
+//         <a href="/my-trips" style={styles.link}>
+//           📅 My Trips
+//         </a>
+
+//         {/* PROFILE */}
+
+//         <div style={{ position: "relative" }} ref={menuRef}>
 //           <img
 //             onClick={() => setShowMenu(!showMenu)}
-//             src={`https://ui-avatars.com/api/?name=${user?.name}&background=0D8ABC&color=fff`}
+//             src={`https://ui-avatars.com/api/?name=${
+//               user?.name || "User"
+//             }&background=2563eb&color=fff`}
 //             alt="avatar"
-//             style={{ ...styles.avatar, cursor: "pointer" }}
+//             style={styles.avatar}
 //           />
 
 //           {showMenu && (
-//             <div style={styles.dropdown}>
-              
-//               {/* Top User Info */}
-//               <div style={styles.userInfo}>
-//                 <div>
-//                   <p style={styles.name}>{user?.name}</p>
-//                   <p style={styles.email}>{user?.email}</p>
-//                 </div>
+//             <div
+//               style={{
+//                 ...styles.dropdown,
+//                 background: darkMode ? "#111827" : "white",
+//                 color: darkMode ? "white" : "#111827",
+//               }}
+//             >
+//               <div style={styles.userSection}>
+//                 <img
+//                   src={`https://ui-avatars.com/api/?name=${
+//                     user?.name || "User"
+//                   }&background=2563eb&color=fff`}
+//                   alt="avatar"
+//                   style={styles.largeAvatar}
+//                 />
+
+//                 <h3 style={{ margin: 0 }}>
+//                   {user?.name || "Guest User"}
+//                 </h3>
+
+//                 <p
+//                   style={{
+//                     margin: "5px 0 0",
+//                     fontSize: "13px",
+//                     color: darkMode ? "#cbd5e1" : "#64748b",
+//                   }}
+//                 >
+//                   {user?.email || "No Email"}
+//                 </p>
 //               </div>
 
-//               <hr />
+//               <div style={styles.menu}>
+//                 <a href="/" style={styles.menuItem}>
+//                   🏠 Home
+//                 </a>
 
-//               {/* Menu Options */}
-//               <p style={styles.menuItem}>👤 Profile</p>
-//               <p style={styles.menuItem}>📅 Trips</p>
-//               <p style={styles.menuItem}>⚙️ Settings</p>
+//                 <a href="/create-trip" style={styles.menuItem}>
+//                   ✈️ Create Trip
+//                 </a>
 
-//               <hr />
+//                 <a href="/my-trips" style={styles.menuItem}>
+//                   📅 My Trips
+//                 </a>
 
-//               <p onClick={handleLogout} style={styles.logout}>
-//                 🔴 Logout
-//               </p>
+//                 <a href="/profile" style={styles.menuItem}>
+//                   👤 Edit Profile
+//                 </a>
 
+//                 <button onClick={handleLogout} style={styles.logoutBtn}>
+//                   🔴 Logout
+//                 </button>
+//               </div>
 //             </div>
 //           )}
 //         </div>
 //       </div>
-//     </div>
+//     </nav>
 //   );
 // }
 
 // const styles = {
 //   nav: {
+//     padding: "15px 30px",
 //     display: "flex",
 //     justifyContent: "space-between",
-//     padding: "15px 30px",
-//     background: "#4f46e5",
-//     color: "white"
+//     alignItems: "center",
+//     position: "sticky",
+//     top: 0,
+//     zIndex: 1000,
 //   },
+
+//   logo: {
+//     color: "white",
+//     textDecoration: "none",
+//     fontSize: "24px",
+//     fontWeight: "bold",
+//   },
+
 //   right: {
 //     display: "flex",
 //     alignItems: "center",
-//     gap: "15px"
+//     gap: "18px",
 //   },
+
+//   themeBtn: {
+//     border: "none",
+//     background: "rgba(255,255,255,0.15)",
+//     padding: "10px 12px",
+//     borderRadius: "10px",
+//     cursor: "pointer",
+//     color: "white",
+//     fontSize: "16px",
+//   },
+
+//   link: {
+//     color: "white",
+//     textDecoration: "none",
+//     fontWeight: "500",
+//   },
+
 //   avatar: {
-//     borderRadius: "50%"
+//     width: "42px",
+//     height: "42px",
+//     borderRadius: "50%",
+//     cursor: "pointer",
+//     border: "2px solid white",
 //   },
+
 //   dropdown: {
 //     position: "absolute",
-//     top: "50px",
-//     right: "0",
-//     background: "#ffffff",
-//     padding: "10px",
-//     borderRadius: "8px",
-//     boxShadow: "0 2px 10px rgba(242, 238, 238, 0.2)",
-//     width: "150px",
-//     textAlign: "left",
+//     top: "60px",
+//     right: 0,
+//     width: "260px",
+//     borderRadius: "18px",
+//     overflow: "hidden",
+//     boxShadow: "0 15px 40px rgba(0,0,0,0.25)",
+//   },
+
+//   userSection: {
+//     padding: "25px 20px",
+//     textAlign: "center",
+//     borderBottom: "1px solid rgba(148,163,184,0.2)",
+//   },
+
+//   largeAvatar: {
+//     width: "70px",
+//     height: "70px",
+//     borderRadius: "50%",
+//     marginBottom: "10px",
+//   },
+
+//   menu: {
+//     display: "flex",
+//     flexDirection: "column",
+//   },
+
+//   menuItem: {
+//     padding: "14px 20px",
+//     textDecoration: "none",
+//     color: "inherit",
+//     fontWeight: "500",
+//   },
+
+//   logoutBtn: {
+//     margin: "15px",
+//     padding: "12px",
+//     border: "none",
+//     borderRadius: "10px",
+//     background: "#dc2626",
+//     color: "white",
+//     cursor: "pointer",
+//     fontWeight: "bold",
 //   },
 // };
 
 // export default Navbar;
 
-import { useContext, useState } from "react";
-import { ThemeContext } from "../context/ThemeContext";
+import { useEffect, useRef, useState } from "react";
 
 function Navbar() {
-  const { toggleTheme } = useContext(ThemeContext);
   const [showMenu, setShowMenu] = useState(false);
+
+  const menuRef = useRef();
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
+  // CLOSE MENU ON OUTSIDE CLICK
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+
+    return () => {
+      document.removeEventListener("mousedown", handler);
+    };
+  }, []);
+
   const handleLogout = () => {
     localStorage.clear();
+
     window.location.href = "/login";
   };
 
   return (
-    <div style={styles.nav}>
-      <h2>✈️ AI Trip Planner</h2>
+    <nav style={styles.nav}>
+      {/* LOGO */}
+
+      <a href="/" style={styles.logo}>
+        AI Trip Planner
+      </a>
+
+      {/* RIGHT */}
 
       <div style={styles.right}>
-        <button onClick={toggleTheme}>🌙</button>
+        {/* MY TRIPS */}
 
-        <a href="/my-trips" style={{ color: "white", textDecoration: "none", marginLeft: "15px" }}>
+        <a href="/my-trips" style={styles.link}>
           📅 My Trips
         </a>
 
-        <div style={{ position: "relative" }}>
+        {/* PROFILE */}
+
+        <div style={{ position: "relative" }} ref={menuRef}>
           <img
             onClick={() => setShowMenu(!showMenu)}
-            src={`https://ui-avatars.com/api/?name=${user?.name || "User"}&background=0D8ABC&color=fff`}
+            src={
+              user?.avatar
+                ? user.avatar
+                : `https://ui-avatars.com/api/?name=${
+                    user?.name || "User"
+                  }&background=2563eb&color=fff`
+            }
             alt="avatar"
-            style={{ ...styles.avatar, cursor: "pointer" }}
+            style={styles.avatar}
           />
 
           {showMenu && (
             <div style={styles.dropdown}>
-              
-              {/* User Info */}
-              <div style={styles.userInfo}>
-                <p style={styles.name}>{user?.name || "Guest User"}</p>
-                <p style={styles.email}>{user?.email || "No email"}</p>
+              <div style={styles.userSection}>
+                <img
+                  src={
+                    user?.avatar
+                      ? user.avatar
+                      : `https://ui-avatars.com/api/?name=${
+                          user?.name || "User"
+                        }&background=2563eb&color=fff`
+                  }
+                  alt="avatar"
+                  style={styles.largeAvatar}
+                />
+
+                <h3 style={{ margin: 0 }}>
+                  {user?.name || "Guest User"}
+                </h3>
+
+                <p style={styles.email}>
+                  {user?.email || "No Email"}
+                </p>
               </div>
 
-              <hr style={styles.divider} />
+              <div style={styles.menu}>
+                <a href="/" style={styles.menuItem}>
+                  🏠 Home
+                </a>
 
-              {/* Menu */}
-              <p style={styles.menuItem}>👤 Profile</p>
-              <p style={styles.menuItem}>📅 Trips</p>
-              <p style={styles.menuItem}>⚙️ Settings</p>
+                <a href="/create-trip" style={styles.menuItem}>
+                  ✈️ Create Trip
+                </a>
 
-              <hr style={styles.divider} />
+                <a href="/my-trips" style={styles.menuItem}>
+                  📅 My Trips
+                </a>
 
-              <p onClick={handleLogout} style={styles.logout}>
-                🔴 Logout
-              </p>
+                <a href="/profile" style={styles.menuItem}>
+                  👤 Edit Profile
+                </a>
+
+                <button
+                  onClick={handleLogout}
+                  style={styles.logoutBtn}
+                >
+                  🔴 Logout
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
 
 const styles = {
   nav: {
+    padding: "15px 30px",
     display: "flex",
     justifyContent: "space-between",
-    padding: "15px 30px",
-    background: "#4f46e5",
+    alignItems: "center",
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
+    background:
+      "linear-gradient(to right, #0f172a, #1e293b)",
+    borderBottom:
+      "1px solid rgba(255,255,255,0.08)",
+    backdropFilter: "blur(10px)",
+  },
+
+  logo: {
     color: "white",
-    alignItems: "center"
+    textDecoration: "none",
+    fontSize: "26px",
+    fontWeight: "800",
+    letterSpacing: "0.5px",
   },
 
   right: {
     display: "flex",
     alignItems: "center",
-    gap: "15px"
+    gap: "18px",
+  },
+
+  link: {
+    color: "white",
+    textDecoration: "none",
+    fontWeight: "600",
+    fontSize: "15px",
   },
 
   avatar: {
+    width: "46px",
+    height: "46px",
     borderRadius: "50%",
-    width: "40px",
-    height: "40px"
+    cursor: "pointer",
+    border: "2px solid white",
+    objectFit: "cover",
   },
 
   dropdown: {
     position: "absolute",
-    top: "50px",
-    right: "0",
-    background: "#ffffff",
-    padding: "15px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-    width: "220px",
-    textAlign: "left",
-    zIndex: 100
+    top: "65px",
+    right: 0,
+    width: "280px",
+    borderRadius: "20px",
+    overflow: "hidden",
+    background: "#111827",
+    color: "white",
+    border: "1px solid rgba(255,255,255,0.08)",
+    boxShadow: "0 15px 40px rgba(0,0,0,0.35)",
   },
 
-  userInfo: {
-    marginBottom: "10px"
+  userSection: {
+    padding: "28px 20px",
+    textAlign: "center",
+    borderBottom:
+      "1px solid rgba(148,163,184,0.15)",
   },
 
-  name: {
-    margin: 0,
-    fontWeight: "bold",
-    color: "#111"
+  largeAvatar: {
+    width: "80px",
+    height: "80px",
+    borderRadius: "50%",
+    marginBottom: "12px",
+    objectFit: "cover",
+    border: "3px solid #3b82f6",
   },
 
   email: {
-    margin: 0,
-    fontSize: "12px",
-    color: "#666"
+    margin: "6px 0 0",
+    fontSize: "13px",
+    color: "#cbd5e1",
+  },
+
+  menu: {
+    display: "flex",
+    flexDirection: "column",
   },
 
   menuItem: {
-    margin: "8px 0",
-    cursor: "pointer",
-    color: "#333"
+    padding: "15px 22px",
+    textDecoration: "none",
+    color: "white",
+    fontWeight: "500",
+    borderBottom:
+      "1px solid rgba(255,255,255,0.05)",
   },
 
-  logout: {
-    marginTop: "10px",
-    cursor: "pointer",
-    color: "red",
-    fontWeight: "500"
-  },
-
-  divider: {
-    margin: "10px 0",
+  logoutBtn: {
+    margin: "18px",
+    padding: "13px",
     border: "none",
-    borderTop: "1px solid #eee"
-  }
+    borderRadius: "12px",
+    background: "#dc2626",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "15px",
+  },
 };
 
 export default Navbar;

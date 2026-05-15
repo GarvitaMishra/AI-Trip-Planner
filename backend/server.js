@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const { protect } = require("./middleware/authMiddleware");
 const tripRoutes = require("./routes/tripRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 // Create express app
 const app = express();
@@ -15,6 +16,7 @@ const app = express();
 // Middleware
 app.use(cors()); // allows frontend to talk to backend
 app.use(express.json()); // allows us to read JSON data
+app.use("/api/profile", profileRoutes);
 
 // use routes
 app.use("/api/auth", authRoutes);
